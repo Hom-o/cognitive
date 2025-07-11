@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Dashboard | Analytical Ability Test</title>
+    <!-- Google Tag Manager -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+    </script>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script> <!-- **** REPLACE WITH YOUR GTM ID **** -->
+    <!-- End Google Tag Manager -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&family=Roboto+Mono:wght@400;500&display=swap');
+        :root {
+            --primary: #000000; --accent: #0066ff; --danger: #ff3366; --success: #10b981; 
+            --gray-100: #f8f9fa; --gray-200: #e9ecef; --gray-600: #6c757d; --gray-700: #495057;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 62.5%; }
+        body { font-family: 'Calibri Light', 'Inter', sans-serif; font-weight: 300; font-size: 1.4rem; line-height: 1.6; color: var(--primary); background: #ffffff; }
+        .dashboard-layout { display: grid; grid-template-columns: 1fr; min-height: 100vh; }
+        @media (min-width: 1024px) { .dashboard-layout { grid-template-columns: 240px 1fr; } }
+        .sidebar { background: var(--gray-100); border-right: 1px solid var(--gray-200); padding: 2rem 0; display: none; }
+        @media (min-width: 1024px) { .sidebar { display: block; } }
+        .sidebar-title { font-size: 1rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-600); padding: 0 2rem; margin-bottom: 1rem; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 1.2rem; padding: 0.8rem 2rem; color: var(--gray-700); text-decoration: none; font-size: 1.2rem; transition: all 0.2s ease; }
+        .sidebar-menu a.active { background: white; color: var(--primary); border-right: 2px solid var(--accent); }
+        .sidebar-icon { width: 16px; height: 16px; opacity: 0.6; }
+        .main-content { padding: 1.5rem; }
+        @media (min-width: 768px) { .main-content { padding: 3rem; } }
+        .dashboard-header { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; }
+        @media (min-width: 768px) { .dashboard-header { flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 3rem; } }
+        .dashboard-title h1 { font-size: 2rem; font-weight: 300; }
+        @media (min-width: 768px) { .dashboard-title h1 { font-size: 2.4rem; } }
+        .dashboard-subtitle { font-size: 1.2rem; color: var(--gray-600); }
+        .btn-danger { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: 1px solid var(--danger); background: transparent; color: var(--danger); cursor: pointer; transition: all 0.2s ease; }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem; } }
+        .kpi-card { background: white; border: 1px solid var(--gray-200); padding: 1.5rem; position: relative; }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+        .kpi-card.success::before { background: var(--success); }
+        .kpi-label { font-size: 1rem; color: var(--gray-600); margin-bottom: 0.8rem; }
+        .kpi-value { font-size: 2.2rem; font-weight: 300; }
+        @media (min-width: 768px) { .kpi-value { font-size: 2.8rem; } }
+        .card { background: white; border: 1px solid var(--gray-200); }
+        .card-header { padding: 1.6rem; border-bottom: 1px solid var(--gray-200); }
+        .card-title { font-size: 1.4rem; font-weight: 400; }
+        .card-body { padding: 1.5rem; }
+        #game-board { position: relative; width: 100%; aspect-ratio: 16 / 9; background: white; border: 1px solid var(--gray-200); overflow: hidden; }
+        .game-message { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .game-message h3 { font-size: 2rem; font-weight: 500; font-family: 'Roboto Mono', monospace; letter-spacing: 0.1em; color: var(--primary); }
+        @media (min-width: 768px) { .game-message h3 { font-size: 3.2rem; } }
+        .option-block { position: absolute; padding: 0.8rem; cursor: pointer; font-family: 'Roboto Mono', monospace; font-size: 1rem; transition: all 0.2s ease; opacity: 0; animation: fadeIn 0.3s forwards; }
+        .option-block:hover { transform: scale(1.1); z-index: 10; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .btn { padding: 0.8rem 2rem; font-size: 1.1rem; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer; transition: all 0.2s ease; margin-top: 2rem; }
+        .btn:hover { background: var(--primary); color: white; }
+        #age-input { font-size: 1.4rem; padding: 0.8rem; width: 100px; text-align: center; border: 1px solid var(--gray-200); }
+        .results-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; }
+        .results-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; }
+        .results-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media (min-width: 640px) { .results-grid { grid-template-columns: 1fr 1fr; } }
+        .summary { font-size: 1.6rem; font-weight: 400; margin-top: 2rem; text-align: center; border-top: 1px solid var(--gray-200); padding-top: 2rem; }
+        .suggestion { font-size: 1.4rem; font-weight: 500; color: var(--danger); margin-top: 1rem; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+        footer { font-size: 1rem; color: var(--gray-600); text-align: center; margin-top: 3rem; }
+    </style>
+</head>
+<body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Assessments</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="active"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.36 2.72a2.003 2.003 0 0 0-2.83 0l-1.41 1.41-4.24-4.24-1.41 1.41 4.24 4.24-1.41 1.41-4.24-4.24-1.41 1.41 4.24 4.24-1.41 1.41-4.24-4.24-1.41 1.41 4.24 4.24-1.41 1.41a2.003 2.003 0 0 0 0 2.83l1.41 1.41 4.24 4.24 1.41-1.41-4.24-4.24 1.41-1.41 4.24 4.24 1.41-1.41-4.24-4.24 1.41-1.41 4.24 4.24 1.41-1.41-4.24-4.24 1.41-1.41a2.003 2.003 0 0 0 2.83 0l1.41-1.41-4.24-4.24 1.41-1.41 4.24 4.24 1.41-1.41a2.003 2.003 0 0 0 0-2.83z"/></svg>Analytical Ability</a></li>
+                </ul>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1 id="welcome-message">Cognitive Dashboard</h1>
+                    <p class="dashboard-subtitle">Analytical Ability Test: A high-intensity test of memory and focus.</p>
+                </div>
+                <div class="header-actions"><button id="sign-out-button" class="btn-danger">Sign Out</button></div>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Attempt</div>
+                    <div id="attempt-counter" class="kpi-value">0 / 30</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-label">High Score</div>
+                    <div id="high-score" class="kpi-value">0 / 100</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">Test: Analytical Ability</h3></div>
+                <div class="card-body">
+                    <div id="game-board">
+                        <div id="game-message" class="game-message"></div>
+                    </div>
+                </div>
+            </div>
+            <footer>Zi-US Cognitive Assessment Platform</footer>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgij7wgkirr2k2pnyspISqeLexXWDSC44",
+            authDomain: "zi-us-login.firebaseapp.com",
+            projectId: "zi-us-login",
+            storageBucket: "zi-us-login.firebasestorage.app",
+            messagingSenderId: "914293517426",
+            appId: "1:914293517426:web:188e7cf98421c70ba3a6eb",
+            measurementId: "G-ZJKG95WP5R"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { document.getElementById('welcome-message').textContent = `Welcome, ${user.displayName || user.email}`; } 
+            else { window.location.href = 'login.html'; }
+        });
+
+        document.getElementById('sign-out-button').addEventListener('click', () => { signOut(auth).catch(error => console.error('Sign out error', error)); });
+
+        // --- Analytical Ability Test Logic ---
+        const messageEl = document.getElementById('game-message');
+        const attemptCounterEl = document.getElementById('attempt-counter');
+        const highScoreEl = document.getElementById('high-score');
+
+        let attempt, highScore, currentCode, flashDuration, numOptions, roundStartTime, reactionTimes, userAge, codeLength;
+        highScore = localStorage.getItem('analyticalHighScore') || 0;
+        
+        const CHARS = 'O0S5I1Z2B8G6';
+
+        function generateCode(len) {
+            let code = '';
+            for (let i = 0; i < len; i++) { code += CHARS.charAt(Math.floor(Math.random() * CHARS.length)); }
+            return code;
+        }
+
+        function displayInitialScreen() {
+            messageEl.innerHTML = `
+                <h3 style="color: #333;">Analytical Ability Test</h3>
+                <p style="color: #555; margin-top: 1rem;">Enter your age to calibrate the assessment.</p>
+                <input type="number" id="age-input" placeholder="e.g., 25" class="btn mt-4" style="color: black; background: white; text-align: center;">
+                <button id="start-btn" class="btn">Start Assessment</button>
+            `;
+            document.getElementById('start-btn').onclick = () => {
+                const age = parseInt(document.getElementById('age-input').value);
+                if (age && age > 5 && age < 100) { userAge = age; startGame(); } 
+                else { alert("Please enter a valid age between 6 and 99."); }
+            };
+        }
+
+        function startGame() {
+            const peakAge = 25;
+            const ageDifference = Math.abs(userAge - peakAge);
+            flashDuration = 1000 + (ageDifference * 15);
+            
+            attempt = 0;
+            codeLength = 12;
+            numOptions = 11;
+            reactionTimes = [];
+            attemptCounterEl.textContent = "0 / 30";
+            highScoreEl.textContent = `${highScore} / 100`;
+            nextRound();
+        }
+        
+        function nextRound() {
+            if (attempt >= 30) {
+                perfectGame();
+                return;
+            }
+            attempt++;
+            attemptCounterEl.textContent = `${attempt} / 30`;
+            messageEl.innerHTML = '';
+            currentCode = generateCode(codeLength);
+            messageEl.innerHTML = `<h3>${currentCode}</h3>`;
+            
+            setTimeout(() => {
+                messageEl.innerHTML = '';
+                roundStartTime = Date.now();
+                presentOptions();
+            }, flashDuration);
+        }
+
+        function presentOptions() {
+            const options = new Set([currentCode]);
+            while (options.size < numOptions) { options.add(generateCode(codeLength)); }
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            shuffledOptions.forEach(code => messageEl.appendChild(createOptionBlock(code)));
+        }
+
+        function createOptionBlock(code) {
+            const block = document.createElement('div');
+            const colors = ['#000000', '#ffffff', '#ff3366', '#0066ff'];
+            const bgColor = colors[Math.floor(Math.random() * colors.length)];
+            block.className = 'option-block';
+            block.textContent = code;
+            block.style.background = bgColor;
+            block.style.color = (bgColor === '#000000' || bgColor === '#0066ff') ? 'white' : 'black';
+            block.style.borderColor = (bgColor === '#ffffff') ? '#ccc' : bgColor;
+            block.style.left = `${5 + Math.random() * 70}%`;
+            block.style.top = `${5 + Math.random() * 75}%`;
+            block.addEventListener('click', (e) => { e.stopPropagation(); handleSelection(code); });
+            return block;
+        }
+
+        function handleSelection(selectedCode) {
+            if (!document.querySelector('.option-block')) return;
+            
+            const reactionTime = Date.now() - roundStartTime;
+            reactionTimes.push(reactionTime);
+            messageEl.innerHTML = '';
+
+            if (selectedCode === currentCode) {
+                flashDuration = Math.max(150, flashDuration * 0.96); // 4% faster
+                numOptions = Math.min(40, numOptions + 1); // Slower increase
+                if (attempt % 5 === 0) codeLength++; // Increase length every 5 rounds
+                setTimeout(nextRound, 250);
+            } else {
+                gameOver();
+            }
+        }
+        
+        function calculateFinalScore() {
+            const accuracyComponent = (attempt / 30) * 60; // Max 60 points for accuracy
+            const difficultyComponent = (codeLength - 12) * 5 + (numOptions - 11) * 0.5; // Points for difficulty reached
+            const speedComponent = Math.max(0, (1500 - flashDuration) / 100) * 2; // Points for speed
+            const finalScore = Math.min(100, accuracyComponent + difficultyComponent + speedComponent);
+            return Math.round(finalScore);
+        }
+
+        function calculateIQ() {
+            if (reactionTimes.length === 0) return {};
+            const n = reactionTimes.length;
+            const avgReaction = reactionTimes.reduce((a, b) => a + b, 0) / n;
+            const reactionStdDev = Math.sqrt(reactionTimes.map(x => Math.pow(x - avgReaction, 2)).reduce((a, b) => a + b) / n);
+            const benchmarkReaction = 350 + Math.abs(userAge - 25) * 6;
+            
+            const processingSpeed = Math.max(70, 100 + (benchmarkReaction - avgReaction) * 0.15);
+            const focusConsistency = Math.max(70, 135 - (reactionStdDev * 0.2));
+            const workingMemory = Math.max(70, 85 + attempt * 1.5 - (userAge / 10));
+            const decisionMaking = Math.max(70, 90 + (attempt / (numOptions - 1)) * 40);
+            const visualAcuity = Math.max(70, 140 - (flashDuration / 15));
+            
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for(let i=0; i<n; i++) { sumX += i; sumY += reactionTimes[i]; sumXY += i * reactionTimes[i]; sumX2 += i * i; }
+            const slope = n > 1 ? (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX) : 0;
+            const cognitiveEndurance = Math.max(70, 100 - slope * 0.5);
+
+            const fluidIntelligence = (processingSpeed + focusConsistency + workingMemory + decisionMaking + visualAcuity) / 5;
+
+            return {
+                "Processing Speed": Math.round(processingSpeed), "Focus Consistency": Math.round(focusConsistency),
+                "Working Memory": Math.round(workingMemory), "Decision Making": Math.round(decisionMaking),
+                "Cognitive Endurance": Math.round(cognitiveEndurance), "Visual Acuity": Math.round(visualAcuity),
+                "Fluid Intelligence (IQ)": Math.round(fluidIntelligence)
+            };
+        }
+
+        function generateSummary(iqScores) {
+            const summary = `Shows ${iqScores["Processing Speed"] > 110 ? 'elite' : 'strong'} processing, ${iqScores["Focus Consistency"] > 110 ? 'excellent' : 'steady'} focus, and ${iqScores["Working Memory"] > 105 ? 'robust' : 'developing'} short-term memory.`;
+            
+            const scoresArray = Object.entries(iqScores).filter(([key]) => key !== "Fluid Intelligence (IQ)");
+            scoresArray.sort((a, b) => a[1] - b[1]);
+            const weakestArea = scoresArray.length > 0 ? scoresArray[0][0] : "Focus Consistency";
+            let suggestion = "Enhance: ";
+            if (weakestArea.includes("Speed") || weakestArea.includes("Decision")) suggestion += "Rapid Pattern Recognition.";
+            else if (weakestArea.includes("Memory")) suggestion += "Short-Term Recall.";
+            else if (weakestArea.includes("Focus")) suggestion += "Sustained Mental Focus.";
+            else suggestion += "Visual Data Processing.";
+            
+            return { summary, suggestion };
+        }
+
+        function showResults(title) {
+            const finalScore = calculateFinalScore();
+            if (finalScore > highScore) {
+                highScore = finalScore;
+                localStorage.setItem('analyticalHighScore', highScore);
+            }
+            const iqScores = calculateIQ();
+            const { summary, suggestion } = generateSummary(iqScores);
+            const resultsHtml = Object.entries(iqScores).map(([key, value]) => `<div class="kpi-card ${key.includes('IQ') ? 'success' : ''}"><div class="kpi-label">${key}</div><div class="kpi-value">${value}</div></div>`).join('');
+            
+            const modal = document.createElement('div');
+            modal.className = 'results-modal';
+            modal.innerHTML = `
+                <div class="results-content">
+                    <h2 class="text-2xl font-bold mb-1">${title}</h2>
+                    <p class="text-center text-lg mb-4 text-gray-600">Final Score: ${finalScore} / 100</p>
+                    <div class="results-grid">${resultsHtml}</div>
+                    <p class="summary">"${summary}"</p>
+                    <p class="suggestion">${suggestion}</p>
+                    <button id="restart-btn" class="btn mt-6 mx-auto block">Try Again</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('restart-btn').onclick = () => {
+                document.body.removeChild(modal);
+                displayInitialScreen();
+            };
+        }
+        
+        function gameOver() { showResults("Assessment Complete"); }
+        function perfectGame() { showResults("Perfect Score! Challenge Cleared!"); }
+
+        displayInitialScreen();
+        highScoreEl.textContent = `${highScore} / 100`;
+    </script>
+</body>
+</html>
